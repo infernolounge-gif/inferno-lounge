@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hookah Menu | Inferno Lounge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9952A;
+    --gold-light: #E8B84B;
+    --gold-pale: #F5D98B;
+    --black: #0A0806;
+    --charcoal: #111009;
+    --dark: #1A1610;
+    --text: #D4C5A0;
+    --text-dim: #7A6E5A;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  #smoke-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; opacity: 0.15;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 40px;
+    background: rgba(10,8,6,0.95);
+    border-bottom: 1px solid rgba(201,149,42,0.12);
+  }
+  .nav-logo img { height: 44px; filter: drop-shadow(0 0 8px rgba(201,149,42,0.4)); }
+  .nav-links { display: flex; gap: 28px; list-style: none; }
+  .nav-links a {
+    font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px;
+    color: var(--text-dim); text-decoration: none; text-transform: uppercase; transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold-light); }
+  .nav-back {
+    font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px;
+    color: var(--gold); text-decoration: none; text-transform: uppercase;
+    border: 1px solid rgba(201,149,42,0.3); padding: 9px 20px; transition: all 0.3s;
+  }
+  .nav-back:hover { background: rgba(201,149,42,0.08); }
+  .nav-mobile-toggle {
+    display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px;
+  }
+  .nav-mobile-toggle span { display: block; width: 24px; height: 1px; background: var(--gold); }
+
+  /* HERO */
+  .menu-hero {
+    position: relative; padding: 160px 40px 80px; text-align: center; z-index: 2;
+    background: radial-gradient(ellipse 70% 50% at 50% 60%, rgba(201,149,42,0.07) 0%, transparent 70%);
+  }
+  .menu-hero-label {
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 6px;
+    color: var(--gold); text-transform: uppercase; margin-bottom: 16px; display: block;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+  .menu-hero h1 {
+    font-family: 'Cormorant Garamond', serif; font-size: clamp(48px, 8vw, 88px);
+    font-weight: 300; color: #fff; line-height: 1;
+    animation: fadeUp 0.8s ease 0.4s both;
+  }
+  .menu-hero-sub {
+    font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic;
+    color: var(--text-dim); letter-spacing: 2px; margin-top: 16px;
+    animation: fadeUp 0.8s ease 0.6s both;
+  }
+  .menu-gold-line {
+    width: 80px; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin: 32px auto 0; animation: fadeIn 1s ease 0.8s both;
+  }
+
+  /* SECTION */
+  .menu-section {
+    position: relative; z-index: 2;
+    max-width: 1100px; margin: 0 auto; padding: 80px 40px;
+  }
+  .menu-section + .menu-section { padding-top: 0; }
+  .menu-section-header {
+    display: flex; align-items: center; gap: 24px; margin-bottom: 48px;
+  }
+  .menu-section-title {
+    font-family: 'Cinzel', serif; font-size: clamp(18px, 3vw, 24px);
+    letter-spacing: 4px; color: #fff; text-transform: uppercase; white-space: nowrap;
+  }
+  .menu-section-line {
+    flex: 1; height: 1px; background: linear-gradient(to right, rgba(201,149,42,0.4), transparent);
+  }
+
+  /* HOOKAH TYPES */
+  .hookah-types {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 48px;
+  }
+  .hookah-type-card {
+    border: 1px solid rgba(201,149,42,0.25); padding: 40px 28px; text-align: center;
+    background: linear-gradient(160deg, rgba(201,149,42,0.06) 0%, transparent 60%);
+    position: relative; overflow: hidden; transition: all 0.4s;
+  }
+  .hookah-type-card::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .hookah-type-card:hover { border-color: rgba(201,149,42,0.5); transform: translateY(-4px); }
+  .hookah-type-card:hover::after { opacity: 1; }
+  .hookah-type-name {
+    font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 4px;
+    color: #fff; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .hookah-type-price {
+    font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 300;
+    color: var(--gold-light); line-height: 1;
+  }
+  .hookah-type-price span { font-size: 24px; vertical-align: super; }
+
+  /* ADDONS */
+  .addons-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+  }
+  .addon-row {
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid rgba(201,149,42,0.15); padding: 16px 20px;
+    background: rgba(201,149,42,0.02); transition: border-color 0.3s;
+  }
+  .addon-row:hover { border-color: rgba(201,149,42,0.35); }
+  .addon-name { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px; color: var(--text); text-transform: uppercase; }
+  .addon-price { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--gold-light); }
+
+  /* SPECIALS */
+  .specials-cards {
+    display: flex; gap: 24px; flex-wrap: wrap;
+  }
+  .special-card {
+    flex: 1; min-width: 200px; border: 1px solid rgba(201,149,42,0.3); padding: 36px 28px;
+    text-align: center; background: linear-gradient(135deg, rgba(201,149,42,0.08) 0%, transparent 60%);
+    transition: all 0.3s;
+  }
+  .special-card:hover { border-color: rgba(201,149,42,0.6); }
+  .special-fruit { font-size: 48px; margin-bottom: 12px; }
+  .special-name { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 3px; color: #fff; text-transform: uppercase; margin-bottom: 8px; }
+  .special-price { font-family: 'Cormorant Garamond', serif; font-size: 40px; color: var(--gold-light); }
+
+  /* MIX CARDS */
+  .mix-note {
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; color: var(--gold);
+    text-transform: uppercase; margin-bottom: 32px; text-align: center;
+    border: 1px solid rgba(201,149,42,0.2); padding: 14px;
+    background: rgba(201,149,42,0.03);
+  }
+  .mixes-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
+  }
+  .mix-card {
+    border: 1px solid rgba(201,149,42,0.15); padding: 28px 24px;
+    background: rgba(201,149,42,0.02); transition: all 0.3s;
+  }
+  .mix-card:hover { border-color: rgba(201,149,42,0.4); background: rgba(201,149,42,0.05); }
+  .mix-name {
+    font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 2px;
+    color: #fff; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .mix-badge {
+    font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--black);
+    padding: 3px 10px; display: inline-block; margin-bottom: 10px; text-transform: uppercase;
+  }
+  .mix-desc {
+    font-size: 13px; color: var(--text-dim); line-height: 1.7;
+  }
+
+  /* FLAVORS */
+  .brand-section { margin-bottom: 48px; }
+  .brand-header {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+  }
+  .brand-name {
+    font-family: 'Cinzel', serif; font-size: 16px; letter-spacing: 4px;
+    color: var(--gold); text-transform: uppercase;
+  }
+  .brand-line { flex: 1; height: 1px; background: rgba(201,149,42,0.2); }
+  .flavors-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px;
+  }
+  .flavor-pill {
+    font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 400;
+    color: var(--text-dim); padding: 10px 16px;
+    border: 1px solid rgba(201,149,42,0.1);
+    background: rgba(201,149,42,0.02); transition: all 0.25s; cursor: default;
+    text-align: center;
+  }
+  .flavor-pill:hover { border-color: rgba(201,149,42,0.4); color: var(--text); background: rgba(201,149,42,0.06); }
+
+  /* TOBACCO BRANDS */
+  .brands-logos {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .brand-logo-box {
+    border: 1px solid rgba(201,149,42,0.15); padding: 24px 20px;
+    text-align: center; background: rgba(201,149,42,0.02); transition: all 0.3s;
+  }
+  .brand-logo-box:hover { border-color: rgba(201,149,42,0.4); background: rgba(201,149,42,0.05); }
+  .brand-logo-name {
+    font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px;
+    color: var(--text-dim); text-transform: uppercase;
+  }
+
+  /* DISCLAIMER */
+  .menu-disclaimer {
+    position: relative; z-index: 2;
+    max-width: 900px; margin: 0 auto; padding: 0 40px 80px;
+    text-align: center;
+  }
+  .disclaimer-box {
+    border: 1px solid rgba(201,149,42,0.2); padding: 32px 40px;
+    background: rgba(201,149,42,0.03);
+  }
+  .disclaimer-box p {
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px;
+    color: var(--text-dim); text-transform: uppercase; line-height: 2.2;
+  }
+  .disclaimer-box p + p { margin-top: 8px; }
+
+  /* FOOTER */
+  footer {
+    padding: 48px 40px 32px; text-align: center;
+    border-top: 1px solid rgba(201,149,42,0.1); background: var(--black);
+    position: relative; z-index: 2;
+  }
+  footer img { height: 44px; opacity: 0.6; margin-bottom: 16px; }
+  .footer-copy { font-size: 12px; color: rgba(122,110,90,0.5); letter-spacing: 1px; }
+
+  /* MOBILE BAR */
+  .mobile-bar {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,8,6,0.97); border-top: 1px solid rgba(201,149,42,0.2);
+    grid-template-columns: 1fr 1fr;
+  }
+  .mobile-bar a {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 12px 8px; text-decoration: none; gap: 4px;
+  }
+  .mobile-bar a:last-child { background: linear-gradient(135deg, var(--gold), var(--gold-light)); }
+  .mobile-bar-icon { font-size: 18px; }
+  .mobile-bar-label { font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+  .mobile-bar a:last-child .mobile-bar-label { color: var(--black); }
+
+  .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-links, .nav-back { display: none; }
+    .nav-mobile-toggle { display: flex; }
+    .mobile-bar { display: grid; }
+    .hookah-types { grid-template-columns: 1fr; }
+    .menu-section { padding: 60px 24px; }
+    .brands-logos { grid-template-columns: repeat(2, 1fr); }
+    .menu-hero { padding: 120px 24px 60px; }
+    .menu-disclaimer { padding: 0 24px 80px; }
+    footer { padding-bottom: 80px; }
+    .specials-cards { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="smoke-canvas"></canvas>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <img src="612EC234-BA2C-4046-BA47-367339975DB6-Photoroom.png" alt="Inferno Lounge">
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#events">Events</a></li>
+    <li><a href="index.html#hours">Hours</a></li>
+    <li><a href="index.html#faq">FAQ</a></li>
+  </ul>
+  <a href="index.html" class="nav-back">← Back to Home</a>
+  <div class="nav-mobile-toggle">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="menu-hero">
+  <span class="menu-hero-label">Inferno Lounge</span>
+  <h1>Hookah Menu</h1>
+  <p class="menu-hero-sub">Inhale the Best — Exhale the Stress</p>
+  <div class="menu-gold-line"></div>
+</div>
+
+<!-- CHOOSE A HOOKAH -->
+<div class="menu-section fade-in">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Choose a Hookah</h2>
+    <div class="menu-section-line"></div>
+  </div>
+  <div class="hookah-types">
+    <div class="hookah-type-card">
+      <div class="hookah-type-name">Russian</div>
+      <div class="hookah-type-price"><span>$</span>25</div>
+    </div>
+    <div class="hookah-type-card">
+      <div class="hookah-type-name">Starbuzz</div>
+      <div class="hookah-type-price"><span>$</span>18</div>
+    </div>
+    <div class="hookah-type-card">
+      <div class="hookah-type-name">Khalil Mamoon</div>
+      <div class="hookah-type-price"><span>$</span>15</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD-ONS & SPECIALS -->
+<div class="menu-section fade-in" style="padding-top: 0;">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px; flex-wrap: wrap;">
+    <div>
+      <div class="menu-section-header" style="margin-bottom: 24px;">
+        <h2 class="menu-section-title" style="font-size: 14px;">Add-Ons</h2>
+        <div class="menu-section-line"></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="addon-row"><span class="addon-name">Ice Hose</span><span class="addon-price">+$3</span></div>
+        <div class="addon-row"><span class="addon-name">Ice in Vase</span><span class="addon-price">+$3</span></div>
+        <div class="addon-row"><span class="addon-name">HMD Upgrade</span><span class="addon-price">+$5</span></div>
+        <div class="addon-row"><span class="addon-name">Repack</span><span class="addon-price">+$8</span></div>
+        <div class="addon-row"><span class="addon-name">Dark Tobacco Repack</span><span class="addon-price">+$12</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="menu-section-header" style="margin-bottom: 24px;">
+        <h2 class="menu-section-title" style="font-size: 14px;">Specials</h2>
+        <div class="menu-section-line"></div>
+      </div>
+      <div class="specials-cards">
+        <div class="special-card">
+          <div class="special-fruit">🍍</div>
+          <div class="special-name">Pineapple</div>
+          <div class="special-price">$15</div>
+        </div>
+        <div class="special-card">
+          <div class="special-fruit">🍊</div>
+          <div class="special-name">Grapefruit</div>
+          <div class="special-price">$10</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOUSE MIXES -->
+<div class="menu-section fade-in" style="background: linear-gradient(180deg, transparent 0%, rgba(201,149,42,0.02) 50%, transparent 100%);">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">House Mixes</h2>
+    <div class="menu-section-line"></div>
+  </div>
+  <div class="mix-note">All House Mixes — Russian Hookah or HMD Upgrade Only</div>
+
+  <!-- By Moa Smokes -->
+  <div style="margin-bottom: 40px;">
+    <div class="brand-header">
+      <span class="brand-name" style="font-size: 11px; color: var(--text-dim);">By Moa Smokes</span>
+      <div class="brand-line"></div>
+    </div>
+    <div class="mixes-grid">
+      <div class="mix-card">
+        <span class="mix-badge">Moa Smokes</span>
+        <div class="mix-name">Watermelon Lemonade</div>
+        <p class="mix-desc">Refreshing watermelon, lime, lemon and ice</p>
+      </div>
+      <div class="mix-card">
+        <span class="mix-badge">Moa Smokes</span>
+        <div class="mix-name">Tropical Dreamscape</div>
+        <p class="mix-desc">Tropical peach, mango, passionfruit, and ice with a creamy finish</p>
+      </div>
+      <div class="mix-card">
+        <span class="mix-badge">Moa Smokes</span>
+        <div class="mix-name">Pink Rush</div>
+        <p class="mix-desc">Peach, grapefruit, strawberry, raspberry, and ice for a vibrant blend</p>
+      </div>
+      <div class="mix-card">
+        <span class="mix-badge">Moa Smokes</span>
+        <div class="mix-name">Honey Nectar</div>
+        <p class="mix-desc">Strawberry, watermelon, mango, and pineapple for a sweet, fruity smoke</p>
+      </div>
+      <div class="mix-card">
+        <span class="mix-badge">Moa Smokes</span>
+        <div class="mix-name">Waffle Berry Bliss</div>
+        <p class="mix-desc">Crispy waffle, cinnamon, caramel, strawberry, and ice with a buttery finish</p>
+      </div>
+      <div class="mix-card">
+        <span class="mix-badge">Moa Smokes</span>
+        <div class="mix-name">Mango Citrus Breeze</div>
+        <p class="mix-desc">Sweet mangoes, tangy oranges, grapefruit, cool peppermint, creamy undertones, and ice</p>
+      </div>
+      <div class="mix-card">
+        <span class="mix-badge">Moa Smokes</span>
+        <div class="mix-name">Order of the Phoenix</div>
+        <p class="mix-desc">Sweet strawberry, creamy soda, a hint of vanilla, and a refreshing ice finish</p>
+      </div>
+      <div class="mix-card">
+        <span class="mix-badge">Moa Smokes</span>
+        <div class="mix-name">Summer in Chicago</div>
+        <p class="mix-desc">Mango, passion fruit, lychee, pineapple, kiwi, apple juice, and ice for a refreshing, exotic mix</p>
+      </div>
+      <div class="mix-card">
+        <span class="mix-badge">Moa Smokes</span>
+        <div class="mix-name">Gummy Cola Blast</div>
+        <p class="mix-desc">Cool, tangy blend of cola, sweet gummies, zesty lemon, and a refreshing ice finish</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paan Mixes -->
+  <div style="margin-bottom: 40px;">
+    <div class="brand-header">
+      <span class="brand-name" style="font-size: 11px; color: var(--text-dim);">Paan Mixes</span>
+      <div class="brand-line"></div>
+    </div>
+    <div class="mixes-grid">
+      <div class="mix-card">
+        <div class="mix-name">Paan Zabardast</div>
+        <p class="mix-desc">Unique mix of fragrant paan, sweet lychee, and a cool ice finish</p>
+      </div>
+      <div class="mix-card">
+        <div class="mix-name">Inferno Fire</div>
+        <p class="mix-desc">Traditional paan with the citrusy tang of oranges and a cool ice finish</p>
+      </div>
+      <div class="mix-card">
+        <div class="mix-name">Habibi Mix</div>
+        <p class="mix-desc">Aromatic paan, tangy kiwi, and a cool ice finish</p>
+      </div>
+      <div class="mix-card">
+        <div class="mix-name">Mango Paan Fusion</div>
+        <p class="mix-desc">Paan, sweet mango, and the tangy citrusy flavor of oranges</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Double Apple Mixes -->
+  <div style="margin-bottom: 40px;">
+    <div class="brand-header">
+      <span class="brand-name" style="font-size: 11px; color: var(--text-dim);">Double Apple Mixes</span>
+      <div class="brand-line"></div>
+    </div>
+    <div class="mixes-grid">
+      <div class="mix-card">
+        <div class="mix-name">Apple Citrus Frost</div>
+        <p class="mix-desc">Crisp combination of green apple, red apple, tangy orange, and a refreshing ice finish</p>
+      </div>
+      <div class="mix-card">
+        <div class="mix-name">Apple Orchard Twist</div>
+        <p class="mix-desc">Fruity blend of green apple, red apple, tangy kiwi, and juicy peach</p>
+      </div>
+      <div class="mix-card">
+        <div class="mix-name">Nakhla Double Apple</div>
+        <p class="mix-desc">Crisp and refreshing blend of red and green apples from Egypt</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- OG Mixes -->
+  <div>
+    <div class="brand-header">
+      <span class="brand-name" style="font-size: 11px; color: var(--text-dim);">OG Mixes — Since 2006</span>
+      <div class="brand-line"></div>
+    </div>
+    <div class="mixes-grid">
+      <div class="mix-card">
+        <div class="mix-name">Paradise</div>
+        <p class="mix-desc">Sweet combination of juicy blueberries and ripe peaches</p>
+      </div>
+      <div class="mix-card">
+        <div class="mix-name">Kill Shot</div>
+        <p class="mix-desc">Sweet mix of ripe peaches and tangy oranges with a refreshing ice finish</p>
+      </div>
+      <div class="mix-card">
+        <div class="mix-name">Black Pink</div>
+        <p class="mix-desc">Creamy blend of sweet peaches and strawberry milkshake</p>
+      </div>
+      <div class="mix-card" style="grid-column: 1 / -1;">
+        <div class="mix-name">Top G — 4 Versions</div>
+        <p class="mix-desc" style="margin-bottom: 12px;"><strong style="color: var(--gold); font-size: 11px; letter-spacing: 1px;">V1</strong> — Tangy lime, sweet lychee, juicy blueberry, and ice</p>
+        <p class="mix-desc" style="margin-bottom: 12px;"><strong style="color: var(--gold); font-size: 11px; letter-spacing: 1px;">V2</strong> — Tangy lime, tropical kiwi, sweet lychee, juicy blueberry, and ice</p>
+        <p class="mix-desc" style="margin-bottom: 12px;"><strong style="color: var(--gold); font-size: 11px; letter-spacing: 1px;">V3</strong> — Tangy lime, exotic passionfruit, sweet lychee, juicy blueberry, and ice</p>
+        <p class="mix-desc"><strong style="color: var(--gold); font-size: 11px; letter-spacing: 1px;">V4</strong> — Lime, ripe mango, tangy oranges, sweet lychee, juicy blueberry, and ice</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHOOSE A FLAVOR -->
+<div class="menu-section fade-in" style="background: linear-gradient(180deg, transparent 0%, rgba(201,149,42,0.02) 50%, transparent 100%);">
+  <div class="menu-section-header">
+    <h2 class="menu-section-title">Choose a Flavor</h2>
+    <div class="menu-section-line"></div>
+  </div>
+
+  <!-- Al Fakher -->
+  <div class="brand-section">
+    <div class="brand-header">
+      <span class="brand-name">Al-Fakher</span>
+      <div class="brand-line"></div>
+    </div>
+    <div class="flavors-grid">
+      <div class="flavor-pill">Grape</div>
+      <div class="flavor-pill">Lemon Mint</div>
+      <div class="flavor-pill">Mint</div>
+      <div class="flavor-pill">Double Apple</div>
+      <div class="flavor-pill">Peach</div>
+      <div class="flavor-pill">Guava</div>
+      <div class="flavor-pill">Watermelon</div>
+      <div class="flavor-pill">Orange</div>
+      <div class="flavor-pill">Paan</div>
+      <div class="flavor-pill">Cherry</div>
+      <div class="flavor-pill">Vanilla</div>
+      <div class="flavor-pill">Mango</div>
+      <div class="flavor-pill">Gum Mint</div>
+      <div class="flavor-pill">Mango Lemonade</div>
+      <div class="flavor-pill">Pineapple</div>
+      <div class="flavor-pill">Grapefruit</div>
+    </div>
+  </div>
+
+  <!-- Starbuzz -->
+  <div class="brand-section">
+    <div class="brand-header">
+      <span class="brand-name">Starbuzz</span>
+      <div class="brand-line"></div>
+    </div>
+    <div class="flavors-grid">
+      <div class="flavor-pill">Pina Colada</div>
+      <div class="flavor-pill">Irish Peach</div>
+      <div class="flavor-pill">Blue Mist</div>
+      <div class="flavor-pill">Citrus Mist</div>
+      <div class="flavor-pill">Safari Melon Dew</div>
+      <div class="flavor-pill">Sex on the Beach</div>
+      <div class="flavor-pill">Pirates Cave</div>
+      <div class="flavor-pill">Coco Jumbo</div>
+      <div class="flavor-pill">Code 69</div>
+      <div class="flavor-pill">Kiwi Strawberry</div>
+      <div class="flavor-pill">Citrus Mint</div>
+      <div class="flavor-pill">Wild Berry Mint</div>
+      <div class="flavor-pill">Queen of Sex</div>
+      <div class="flavor-pill">Mighty Freeze</div>
+      <div class="flavor-pill">Pineapple Freeze</div>
+      <div class="flavor-pill">Strawberry Margarita</div>
+      <div class="flavor-pill">Pink</div>
+      <div class="flavor-pill">Winter Fresh</div>
+    </div>
+  </div>
+
+  <!-- Fumari -->
+  <div class="brand-section">
+    <div class="brand-header">
+      <span class="brand-name">Fumari</span>
+      <div class="brand-line"></div>
+    </div>
+    <div class="flavors-grid">
+      <div class="flavor-pill">Spiced Chai</div>
+      <div class="flavor-pill">Lemon Mint</div>
+      <div class="flavor-pill">White Gummy Bear</div>
+      <div class="flavor-pill">Fakhfakhina</div>
+      <div class="flavor-pill">Tangelo</div>
+      <div class="flavor-pill">Mint Chocolate Chill</div>
+      <div class="flavor-pill">Ambrosia</div>
+    </div>
+  </div>
+
+  <!-- Eternal Smoke -->
+  <div class="brand-section">
+    <div class="brand-header">
+      <span class="brand-name">Eternal Smoke</span>
+      <div class="brand-line"></div>
+    </div>
+    <div class="flavors-grid">
+      <div class="flavor-pill">Red Lips</div>
+      <div class="flavor-pill">Blue Lit</div>
+      <div class="flavor-pill">Lemon Lit</div>
+      <div class="flavor-pill">Peach Lit</div>
+      <div class="flavor-pill">Watermelom Lit</div>
+      <div class="flavor-pill">Chilled Wine</div>
+      <div class="flavor-pill">Smoothie Sunshine</div>
+      <div class="flavor-pill">Carribean Nights</div>
+      <div class="flavor-pill">Lime Lit</div>
+      <div class="flavor-pill">Tropical Ball</div>
+      <div class="flavor-pill">Fruity Bubble</div>
+      <div class="flavor-pill">Houdini Secret</div>
+    </div>
+  </div>
+
+  <!-- Other Brands -->
+  <div>
+    <div class="brand-header">
+      <span class="brand-name">Also Available</span>
+      <div class="brand-line"></div>
+    </div>
+    <div class="brands-logos">
+      <div class="brand-logo-box"><div class="brand-logo-name">Adawa</div></div>
+      <div class="brand-logo-box"><div class="brand-logo-name">Trifecta</div></div>
+      <div class="brand-logo-box"><div class="brand-logo-name">Tangiers</div></div>
+      <div class="brand-logo-box"><div class="brand-logo-name">Darkside</div></div>
+      <div class="brand-logo-box"><div class="brand-logo-name">Social Smoke</div></div>
+      <div class="brand-logo-box"><div class="brand-logo-name">Haze</div></div>
+      <div class="brand-logo-box"><div class="brand-logo-name">MustHave</div></div>
+      <div class="brand-logo-box"><div class="brand-logo-name">Element</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="menu-disclaimer fade-in">
+  <div class="disclaimer-box">
+    <p>✦ All products contain nicotine ✦ Take a break during the hookah session ✦</p>
+    <p>✦ We offer a wide selection of additional flavors not listed on the menu ✦</p>
+    <p>✦ Feel free to ask for any preferred brand you don't see ✦</p>
+    <p>✦ Each additional guest sitting/sharing is a $5 charge — beverages not included ✦</p>
+    <p>✦ We offer over 50 unique house mixes that aren't listed on the menu ✦</p>
+    <p>✦ Let us know your flavor preferences and we'll create something amazing just for you ✦</p>
+  </div>
+</div>
+
+<footer>
+  <img src="612EC234-BA2C-4046-BA47-367339975DB6-Photoroom.png" alt="Inferno Lounge">
+  <p class="footer-copy">901 S Roselle Rd, Schaumburg, IL 60193 · (847) 301-9999<br>© 2025 Inferno Hookah Lounge</p>
+</footer>
+
+<!-- MOBILE BAR -->
+<div class="mobile-bar">
+  <a href="index.html">
+    <span class="mobile-bar-icon">🏠</span>
+    <span class="mobile-bar-label">Home</span>
+  </a>
+  <a href="tel:8473019999">
+    <span class="mobile-bar-icon">📞</span>
+    <span class="mobile-bar-label">Reserve</span>
+  </a>
+</div>
+
+<script>
+// Smoke
+const canvas = document.getElementById('smoke-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+const particles = [];
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * canvas.width; this.y = canvas.height + 20;
+    this.size = Math.random() * 100 + 30; this.speedY = -(Math.random() * 0.35 + 0.1);
+    this.speedX = (Math.random() - 0.5) * 0.25; this.opacity = Math.random() * 0.1 + 0.02;
+    this.life = 0; this.maxLife = Math.random() * 280 + 180;
+  }
+  update() { this.x += this.speedX; this.y += this.speedY; this.life++; this.size += 0.2; if (this.life > this.maxLife) this.reset(); }
+  draw() {
+    const fade = this.life < 30 ? this.life/30 : this.life > this.maxLife-50 ? (this.maxLife-this.life)/50 : 1;
+    const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size);
+    g.addColorStop(0,`rgba(201,149,42,${this.opacity*fade})`);
+    g.addColorStop(0.5,`rgba(150,100,20,${this.opacity*0.4*fade})`);
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();
+  }
+}
+for(let i=0;i<14;i++){const p=new Particle();p.life=Math.random()*p.maxLife;particles.push(p);}
+function anim(){ctx.clearRect(0,0,canvas.width,canvas.height);particles.forEach(p=>{p.update();p.draw();});requestAnimationFrame(anim);}
+anim();
+window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+
+// Fade in
+const obs = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
